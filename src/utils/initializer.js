@@ -79,9 +79,9 @@ module.exports = function initializer(defaults) {
   return {
     initialState,
     reducers,
-    reduxMiddleware: [
-      ..._.compact(_.flatten(plugins.map(p => p.reduxMiddleware))),
+    reduxMiddleware: _.compact([
+      ..._.flatten(plugins.map(p => p.reduxMiddleware)),
       ...reduxMiddleware
-    ],
+    ]),
   };
 };

@@ -247,7 +247,7 @@ test('init returns flattened/compacted reduxMiddleware given plugins', (assert) 
         { reduxMiddleware: [null, mw[1], undefined, mw[2], null] },
         {},
       ],
-      reduxMiddleware: [mw[3]],
+      reduxMiddleware: [null, mw[3], undefined],
     },
   };
   const defaults = {};
