@@ -72,6 +72,7 @@ class Griddle extends Component {
       settingsComponentObjects,
       selectors,
       styleConfig: defaultStyleConfig,
+      reduxMiddleware: [],
 
       pageProperties: {
         currentPage: 1,

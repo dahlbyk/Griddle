@@ -3,6 +3,20 @@ import { buildGriddleReducer, buildGriddleComponents } from './compositionUtils'
 import { getColumnProperties } from './columnUtils';
 import { getRowProperties } from './rowUtils';
 
+function pluginReducer(acc, plugin) {
+  const realPlugin = typeof plugin === 'function' ? plugin(acc) : plugin;
+  if (!realPlugin) return acc;
+
+  const {
+    reduxMiddleware = [],
+  } = realPlugin;
+
+  return {
+    ...acc,
+    reduxMiddleware: _.flatten([acc.reduxMiddleware, reduxMiddleware]),
+  };
+}
+
 module.exports = function initializer(defaults) {
   if (!this) throw new Error('this missing!');
 
@@ -24,12 +38,14 @@ module.exports = function initializer(defaults) {
     components: userComponents,
     renderProperties: userRenderProperties = {},
     settingsComponentObjects: userSettingsComponentObjects,
-    reduxMiddleware = [],
     ...userInitialState
   } = this.props;
 
   const rowProperties = getRowProperties(rowPropertiesComponent);
   const columnProperties = getColumnProperties(rowPropertiesComponent);
+
+  const withPlugins = plugins.reduce(pluginReducer, { ...defaults });
+  const withPluginsAndProps = pluginReducer(withPlugins, this.props);
 
   // Combine / compose the reducers to make a single, unified reducer
   const reducers = buildGriddleReducer([dataReducers, ...plugins.map(p => p.reducer)]);
@@ -79,9 +95,6 @@ module.exports = function initializer(defaults) {
   return {
     initialState,
     reducers,
-    reduxMiddleware: _.compact([
-      ..._.flatten(plugins.map(p => p.reduxMiddleware)),
-      ...reduxMiddleware
-    ]),
+    reduxMiddleware: _.compact(withPluginsAndProps.reduxMiddleware),
   };
 };

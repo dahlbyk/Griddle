@@ -242,10 +242,10 @@ test('init returns flattened/compacted reduxMiddleware given plugins', (assert) 
     props: {
       plugins: [
         {},
-        { reduxMiddleware: [mw[0]] },
-        {},
+        () => ({ reduxMiddleware: [mw[0]] }),
+        () => ({ reduxMiddleware: null }),
         { reduxMiddleware: [null, mw[1], undefined, mw[2], null] },
-        {},
+        () => null,
       ],
       reduxMiddleware: [null, mw[3], undefined],
     },
