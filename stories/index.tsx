@@ -1017,6 +1017,59 @@ storiesOf('Griddle main', module)
     );
   })
 
+  .add('with internal filtering via external filter value', () => {
+    // https://stackoverflow.com/questions/47229902/griddle-v1-9-inputbox-in-customfiltercomponent-lose-focus
+
+    const CustomFilterComponent = (props) => (
+      <input
+        value={props.searchString || ''}
+        onChange={(e) => { props.setSearchString(e.target.value); }}
+      />
+    );
+
+    const setSearchStringActionCreator = searchString => ({ type: 'SET_SEARCH_STRING', searchString })
+    const CustomFilterConnectedComponent = reduxConnect(
+      (state: TestState) => ({
+          searchString: state.searchString,
+      }),
+      dispatch => ({
+        setSearchString: (e) => dispatch(setSearchStringActionCreator(e))
+      })
+    )(CustomFilterComponent);
+
+    const plugins = [
+      LocalPlugin,
+      {
+        components: { Filter: () => null },
+      },
+    ];
+    const SomePage = props => (
+      <div>
+        <Griddle data={props.data} plugins={plugins} storeKey="griddleStore"
+          filter={props.filter}
+          />
+
+        Component outside of Griddle that's sharing state
+        <CustomFilterConnectedComponent />
+      </div>
+    );
+
+    const SomePageConnected = reduxConnect(
+      (state: TestState) => ({
+        data: state.data,
+        filter: state.searchString,
+      })
+    )(SomePage);
+
+    testStore.dispatch({ type: 'SET_DATA', data: fakeData });
+
+    return (
+      <Provider store={testStore}>
+        <SomePageConnected />
+      </Provider>
+    );
+  })
+
   .add('with custom store listener (check the console!)', () => {
     const paginationListener = (prevState, nextState) => {
       const page = nextState.getIn(['pageProperties', 'currentPage']);
